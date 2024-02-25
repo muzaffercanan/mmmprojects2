@@ -1,26 +1,25 @@
 public class Node {
-    protected int data;
-    protected Node next;
+    private Term term;
+    private Node next;
 
-    public Node(int data) {
-        this.data = data;
+    public Node(Term term) {
+        this.term = term;
         this.next = null;
     }
 
-    public void setNext(Node next) {
-        this.next = next;
+    public Term getTerm() {
+        return term;
+    }
+
+    public void setTerm(Term term) {
+        this.term = term;
     }
 
     public Node getNext() {
         return next;
     }
 
-    public int getData() {
-        return data;
+    public void setNext(Node next) {
+        this.next = next;
     }
-
-    public String toString() {
-        return "" + data;
-    }
-
 }
