@@ -8,13 +8,13 @@ public class Polynomial {
     }
 
     public void addTerm(Term term) {
-        Node newNode = new Node(term);
-        if (isEmpty()) {
-            head = newNode;
+        if (head == null) {
+            head = new Node(term);
+            tail = head;
         } else {
-            tail.setNext(newNode);
+            tail.setNext(new Node(term));
+            tail = tail.getNext();
         }
-        tail = newNode;
     }
 
     public boolean isEmpty() {
