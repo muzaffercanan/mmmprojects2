@@ -7,28 +7,31 @@ public class PolynomialArithmetic {
 
     public static void main(String[] args) {
         try {
-            Scanner scanner = new Scanner(new File(
-                    "C:/Users/muzca/Desktop/muzo-genel/COURSES/CS/cs201/cs-201-15-tatil/first-lab/src/input.txt"));
-            PrintWriter writer = new PrintWriter(new File(
-                    "C:/Users/muzca/Desktop/muzo-genel/COURSES/CS/cs201/cs-201-15-tatil/first-lab/src/output.txt"));
+            Scanner scanner = new Scanner(new File("C:/Users/muzca/Desktop/muzo-genel/COURSES/CS/cs201/cs-201-15-tatil/first-lab/src/input.txt"));
+            PrintWriter writer = new PrintWriter(new File("C:/Users/muzca/Desktop/muzo-genel/COURSES/CS/cs201/cs-201-15-tatil/first-lab/src/output.txt"));
             int numCases = scanner.nextInt();
-            scanner.nextLine(); // consume newline
+            scanner.nextLine();
             for (int i = 0; i < numCases; i++) {
 
                 String line = scanner.nextLine().trim(); // Read and trim the line
                 // Split the line based on spaces
-                String[] parts = line.split("\\s+"); // ben ekledim
+                String[] parts = line.split("\\s+"); //boşluklara göre ayırır
 
-                char operator = parts[0].charAt(0); // Extract the operator
-                String polynomial1Str = parts[1]; // Extract the first polynomial
-                String polynomial2Str = parts[2]; // Extract the second polynomial
+                char operator = parts[0].charAt(0);
+                String polynomial1Str = parts[1];
+                String polynomial2Str = parts[2];
 
-                // Parse and perform the operation on polynomials
 
                 Polynomial polynomial1 = parsePolynomial(polynomial1Str);
                 Polynomial polynomial2 = parsePolynomial(polynomial2Str);
+
                 Polynomial result = performOperation(operator, polynomial1, polynomial2);
                 writer.println(formatPolynomial(result));
+
+                //System.out.println(polynomial1.getHead().getTerm().getCoefficient());
+                //System.out.println(polynomial1.getHead().getTerm().getExponentX());
+                //System.out.println(polynomial1.getHead().getTerm().getExponentY());
+                //System.out.println(polynomial1.getHead().getTerm().getExponentZ());
 
             }
             scanner.close();
@@ -41,48 +44,75 @@ public class PolynomialArithmetic {
 
     private static Polynomial parsePolynomial(String polynomialStr) {
         Polynomial polynomial = new Polynomial();
-        String[] termsStr = polynomialStr.split("\\s+");
-        for (int i = 1; i < termsStr.length; i++) { // Start from index 1 to skip the operator
-            String termStr = termsStr[i];
+
+        // Split the polynomial string into individual terms based on '+' and '-' characters
+        String[] termsStr = polynomialStr.split("(?=\\+)|(?=\\-)");
+
+        for (String termStr : termsStr) {
+            // Skip empty strings resulting from the split
+            if (termStr.isEmpty()) {
+                continue;
+            }
+
             int coefficient = 1; // Default coefficient if not specified
             int exponentX = 0, exponentY = 0, exponentZ = 0;
-            int lastIndex = 0;
-            for (int j = 0; j < termStr.length(); j++) {
-                char ch = termStr.charAt(j);
-                if (ch == 'x' || ch == 'y' || ch == 'z') {
-                    String factor = termStr.substring(lastIndex, j);
-                    if (!factor.isEmpty()) {
-                        int value = Integer.parseInt(factor);
-                        if (ch == 'x')
-                            exponentX = value;
-                        else if (ch == 'y')
-                            exponentY = value;
-                        else if (ch == 'z')
-                            exponentZ = value;
-                    }
-                    lastIndex = j + 1;
-                } else if (ch == '+' || ch == '-') {
-                    String factor = termStr.substring(lastIndex, j);
-                    if (!factor.isEmpty()) {
-                        coefficient = Integer.parseInt(factor);
-                    }
-                    lastIndex = j;
-                    break;
+
+            // Check if the term starts with a '-' sign, indicating a negative coefficient
+            boolean negative = false;
+            if (termStr.charAt(0) == '-') {
+                negative = true;
+                termStr = termStr.substring(1); // Remove the '-' sign
+            }
+            else if (termStr.charAt(0) == '+') {
+                termStr = termStr.substring(1); // Remove the '+' sign
+            }
+
+            // Split the term to separate coefficient and variables
+            String[] parts = termStr.split("(?=[xyz])");
+
+            // Parse the coefficient
+            if (parts.length > 0 && !parts[0].isEmpty()) {
+                // Check if the part contains a coefficient
+                if (parts[0].matches("[-+]?\\d+")) {
+                    coefficient = Integer.parseInt(parts[0]);
                 }
             }
-            String factor = termStr.substring(lastIndex);
-            if (!factor.isEmpty()) {
-                coefficient = Integer.parseInt(factor);
+
+            // Parse the exponents for variables
+            for (int i = 1; i < parts.length; i++) {
+                if (parts[i].startsWith("x")) {
+                    exponentX = parseExponent(parts[i]);
+                }
+                else if (parts[i].startsWith("y")) {
+                    exponentY = parseExponent(parts[i]);
+                }
+                else if (parts[i].startsWith("z")) {
+                    exponentZ = parseExponent(parts[i]);
+                }
             }
+
+            // Adjust coefficient for negative terms
+            if (negative) {
+                coefficient *= -1;
+            }
+
+            // Create and add the term to the polynomial
             Term term = new Term(coefficient, exponentX, exponentY, exponentZ);
             polynomial.addTerm(term);
         }
+
         return polynomial;
     }
 
-    // private static int extractExponent(String factor) {
-    // return Integer.parseInt(factor.substring(1));
-    // }
+    private static int parseExponent(String term) {
+        if (term.length() == 1) {
+            // If no exponent is specified, return 1
+            return 1;
+        } else {
+            // Parse the exponent from the string
+            return Integer.parseInt(term.substring(1));
+        }
+    }
 
     private static Polynomial performOperation(char operator, Polynomial polynomial1, Polynomial polynomial2) {
         Polynomial result = new Polynomial();
@@ -116,55 +146,71 @@ public class PolynomialArithmetic {
     private static Polynomial addPolynomials(Polynomial polynomial1, Polynomial polynomial2) {
         Polynomial result = new Polynomial();
 
-        Node current1 = polynomial1.getHead();
-        Node current2 = polynomial2.getHead();
+        Node node1 = polynomial1.getHead();
+        Node node2 = polynomial2.getHead();
 
-        while (current1 != null || current2 != null) {
-            if (current1 == null) {
-                while (current2 != null) {
-                    result.addTerm(new Term(current2.getTerm().getCoefficient(),
-                            current2.getTerm().getExponentX(),
-                            current2.getTerm().getExponentY(),
-                            current2.getTerm().getExponentZ()));
-                    current2 = current2.getNext();
+        while (node1 != null && node2 != null) {
+            // Compare the exponents of the terms in node1 and node2
+            int compareResult = compareExponents(node1.getTerm(), node2.getTerm());
+
+            if (compareResult == 0) {
+                // If exponents are equal, add the coefficients and create a new term
+                int sumCoefficient = node1.getTerm().getCoefficient() + node2.getTerm().getCoefficient();
+                if (sumCoefficient != 0) {
+                    Term sumTerm = new Term(sumCoefficient, node1.getTerm().getExponentX(),
+                            node1.getTerm().getExponentY(), node1.getTerm().getExponentZ());
+                    result.addTerm(sumTerm);
                 }
-                break;
-            }
-            if (current2 == null) {
-                while (current1 != null) {
-                    result.addTerm(new Term(current1.getTerm().getCoefficient(),
-                            current1.getTerm().getExponentX(),
-                            current1.getTerm().getExponentY(),
-                            current1.getTerm().getExponentZ()));
-                    current1 = current1.getNext();
-                }
-                break;
-            }
-
-            Term term1 = current1.getTerm();
-            Term term2 = current2.getTerm();
-
-            int comparison = compareExponents(term1, term2);
-
-            if (comparison == 0) {
-                int coefficient = term1.getCoefficient() + term2.getCoefficient();
-                if (coefficient != 0) {
-                    result.addTerm(new Term(coefficient,
-                            term1.getExponentX(), term1.getExponentY(), term1.getExponentZ()));
-                }
-                current1 = current1.getNext();
-                current2 = current2.getNext();
-            } else if (comparison < 0) {
-                result.addTerm(new Term(term1.getCoefficient(),
-                        term1.getExponentX(), term1.getExponentY(), term1.getExponentZ()));
-                current1 = current1.getNext();
+                node1 = node1.getNext();
+                node2 = node2.getNext();
+            } else if (compareResult < 0) {
+                // If the exponent of the term in node1 is less, add it to the result
+                result.addTerm(node1.getTerm());
+                node1 = node1.getNext();
             } else {
-                result.addTerm(new Term(term2.getCoefficient(),
-                        term2.getExponentX(), term2.getExponentY(), term2.getExponentZ()));
-                current2 = current2.getNext();
+                // If the exponent of the term in node2 is less, add it to the result
+                result.addTerm(node2.getTerm());
+                node2 = node2.getNext();
             }
         }
+
+        // Add remaining terms from polynomial1, if any
+        while (node1 != null) {
+            result.addTerm(node1.getTerm());
+            node1 = node1.getNext();
+        }
+
+        // Add remaining terms from polynomial2, if any
+        while (node2 != null) {
+            result.addTerm(node2.getTerm());
+            node2 = node2.getNext();
+        }
+
+        // Consolidate like terms in the result polynomial
+        consolidateLikeTerms(result);
+
         return result;
+    }
+
+    private static void consolidateLikeTerms(Polynomial polynomial) {
+        Node current = polynomial.getHead();
+        while (current != null && current.getNext() != null) {
+            Node nextNode = current.getNext();
+            if (areLikeTerms(current.getTerm(), nextNode.getTerm())) {
+                // If the current and next nodes have like terms, combine them
+                int sumCoefficient = current.getTerm().getCoefficient() + nextNode.getTerm().getCoefficient();
+                current.getTerm().setCoefficient(sumCoefficient);
+                current.setNext(nextNode.getNext());
+            } else {
+                current = current.getNext();
+            }
+        }
+    }
+
+    private static boolean areLikeTerms(Term term1, Term term2) {
+        return term1.getExponentX() == term2.getExponentX() &&
+                term1.getExponentY() == term2.getExponentY() &&
+                term1.getExponentZ() == term2.getExponentZ();
     }
 
     private static Polynomial subtractPolynomials(Polynomial polynomial1, Polynomial polynomial2) {
@@ -247,36 +293,55 @@ public class PolynomialArithmetic {
 
     private static String formatPolynomial(Polynomial polynomial) {
         if (polynomial.isEmpty()) {
-            return "muzo";
+            return "0"; // Return "0" if the polynomial is empty
         }
         StringBuilder result = new StringBuilder();
         Node current = polynomial.getHead();
         while (current != null) {
             Term term = current.getTerm();
+            int coefficient = term.getCoefficient();
+            int exponentX = term.getExponentX();
+            int exponentY = term.getExponentY();
+            int exponentZ = term.getExponentZ();
+
+            // Append the coefficient
             if (result.length() > 0) {
-                result.append("+");
+                if (coefficient > 0) {
+                    result.append("+"); // Add '+' sign for positive coefficients
+                }
+            } else {
+                // Append the negative sign for the first term if the coefficient is negative
+                if (coefficient < 0) {
+                    result.append("-");
+                }
             }
-            result.append(term.getCoefficient());
-            if (term.getExponentX() > 0) {
+            if (coefficient != 1 && coefficient != -1) {
+                result.append(coefficient); // Append the coefficient if not 1 or -1
+            }
+
+            // Append the variables and their exponents
+            if (exponentX > 0) {
                 result.append("x");
-                if (term.getExponentX() > 1) {
-                    result.append(term.getExponentX());
+                if (exponentX > 1) {
+                    result.append(exponentX);
                 }
             }
-            if (term.getExponentY() > 0) {
+            if (exponentY > 0) {
                 result.append("y");
-                if (term.getExponentY() > 1) {
-                    result.append(term.getExponentY());
+                if (exponentY > 1) {
+                    result.append(exponentY);
                 }
             }
-            if (term.getExponentZ() > 0) {
+            if (exponentZ > 0) {
                 result.append("z");
-                if (term.getExponentZ() > 1) {
-                    result.append(term.getExponentZ());
+                if (exponentZ > 1) {
+                    result.append(exponentZ);
                 }
             }
             current = current.getNext();
         }
         return result.toString();
     }
+
+
 }
