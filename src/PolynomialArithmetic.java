@@ -13,8 +13,8 @@ public class PolynomialArithmetic {
             scanner.nextLine();
             for (int i = 0; i < numCases; i++) {
 
-                String line = scanner.nextLine().trim(); // Read and trim the line
-                // Split the line based on spaces
+                String line = scanner.nextLine().trim(); // Reads and trims the line
+
                 String[] parts = line.split("\\s+"); //boşluklara göre ayırır
 
                 char operator = parts[0].charAt(0);
@@ -45,40 +45,40 @@ public class PolynomialArithmetic {
     private static Polynomial parsePolynomial(String polynomialStr) {
         Polynomial polynomial = new Polynomial();
 
-        // Split the polynomial string into individual terms based on '+' and '-' characters
+        // Splits the polynomialString into terms based on '+' and '-'
         String[] termsStr = polynomialStr.split("(?=\\+)|(?=\\-)");
 
         for (String termStr : termsStr) {
-            // Skip empty strings resulting from the split
+            // Skips empty Strings
             if (termStr.isEmpty()) {
                 continue;
             }
 
-            int coefficient = 1; // Default coefficient if not specified
+            int coefficient = 1; // Default coefficient should be 1 if not specified
             int exponentX = 0, exponentY = 0, exponentZ = 0;
 
-            // Check if the term starts with a '-' sign, indicating a negative coefficient
+            // Check if the term starts with a '-' sign, puts negative coefficient
             boolean negative = false;
             if (termStr.charAt(0) == '-') {
                 negative = true;
-                termStr = termStr.substring(1); // Remove the '-' sign
+                termStr = termStr.substring(1); // Remove  '-' sign
             }
             else if (termStr.charAt(0) == '+') {
-                termStr = termStr.substring(1); // Remove the '+' sign
+                termStr = termStr.substring(1); // Remove  '+' sign
             }
 
-            // Split the term to separate coefficient and variables
+            // Splits term into separate coefficient and variables
             String[] parts = termStr.split("(?=[xyz])");
 
-            // Parse the coefficient
+            // Parses the coefficient
             if (parts.length > 0 && !parts[0].isEmpty()) {
-                // Check if the part contains a coefficient
+                // Checks if the part contains a coefficient
                 if (parts[0].matches("[-+]?\\d+")) {
                     coefficient = Integer.parseInt(parts[0]);
                 }
             }
 
-            // Parse the exponents for variables
+            // Parses the exponents for variables
             for (int i = 1; i < parts.length; i++) {
                 if (parts[i].startsWith("x")) {
                     exponentX = parseExponent(parts[i]);
@@ -91,12 +91,12 @@ public class PolynomialArithmetic {
                 }
             }
 
-            // Adjust coefficient for negative terms
+            // put coefficient for negative terms
             if (negative) {
                 coefficient *= -1;
             }
 
-            // Create and add the term to the polynomial
+            // Creates and adds the term to the polynomial
             Term term = new Term(coefficient, exponentX, exponentY, exponentZ);
             polynomial.addTerm(term);
         }
@@ -106,24 +106,28 @@ public class PolynomialArithmetic {
 
     private static int parseExponent(String term) {
         if (term.length() == 1) {
-            // If no exponent is specified, return 1
+            // If there is no any exponent specified, return 1
             return 1;
         } else {
-            // Parse the exponent from the string
+            // Parses the exponent from the string
             return Integer.parseInt(term.substring(1));
         }
     }
 
+    //  Performs the arithmetic operation on two polynomials.
     private static Polynomial performOperation(char operator, Polynomial polynomial1, Polynomial polynomial2) {
         Polynomial result = new Polynomial();
         switch (operator) {
             case '+':
+                //adds if the case is addition
                 result = addPolynomials(polynomial1, polynomial2);
                 break;
             case '-':
+                //subtracts if the case is addition
                 result = subtractPolynomials(polynomial1, polynomial2);
                 break;
             case '*':
+                //multiplies if the case is addition
                 result = multiplyPolynomials(polynomial1, polynomial2);
                 break;
             default:
@@ -132,6 +136,7 @@ public class PolynomialArithmetic {
         return result;
     }
 
+    // Calculates the differences between exponents of each variable
     private static int compareExponents(Term term1, Term term2) {
         int diffX = term1.getExponentX() - term2.getExponentX();
         int diffY = term1.getExponentY() - term2.getExponentY();
@@ -150,11 +155,11 @@ public class PolynomialArithmetic {
         Node node2 = polynomial2.getHead();
 
         while (node1 != null && node2 != null) {
-            // Compare the exponents of the terms in node1 and node2
+            // Compares exponents of the terms both with node1 and node2
             int compareResult = compareExponents(node1.getTerm(), node2.getTerm());
 
             if (compareResult == 0) {
-                // If exponents are equal, add the coefficients and create a new term
+                // If exponents equal, add coefficients and create the new term
                 int sumCoefficient = node1.getTerm().getCoefficient() + node2.getTerm().getCoefficient();
                 if (sumCoefficient != 0) {
                     Term sumTerm = new Term(sumCoefficient, node1.getTerm().getExponentX(),
@@ -164,23 +169,23 @@ public class PolynomialArithmetic {
                 node1 = node1.getNext();
                 node2 = node2.getNext();
             } else if (compareResult < 0) {
-                // If the exponent of the term in node1 is less, add it to the result
+                // If exponent of the term in node1 is lesser, add it to the result
                 result.addTerm(node1.getTerm());
                 node1 = node1.getNext();
             } else {
-                // If the exponent of the term in node2 is less, add it to the result
+                // If the exponent of the term in node2 is lesser , add it to the result
                 result.addTerm(node2.getTerm());
                 node2 = node2.getNext();
             }
         }
 
-        // Add remaining terms from polynomial1, if any
+        // Add remaining terms from polynomial1, if any exists
         while (node1 != null) {
             result.addTerm(node1.getTerm());
             node1 = node1.getNext();
         }
 
-        // Add remaining terms from polynomial2, if any
+        // Add remaining terms from polynomial2, if any exists
         while (node2 != null) {
             result.addTerm(node2.getTerm());
             node2 = node2.getNext();
@@ -192,6 +197,7 @@ public class PolynomialArithmetic {
         return result;
     }
 
+    //it consolidates like terms ,
     private static void consolidateLikeTerms(Polynomial polynomial) {
         Node current = polynomial.getHead();
         while (current != null && current.getNext() != null) {
@@ -207,6 +213,7 @@ public class PolynomialArithmetic {
         }
     }
 
+    //examines the like terms based on their exponents , if it is equal they are likely for addition and subtraction
     private static boolean areLikeTerms(Term term1, Term term2) {
         return term1.getExponentX() == term2.getExponentX() &&
                 term1.getExponentY() == term2.getExponentY() &&
