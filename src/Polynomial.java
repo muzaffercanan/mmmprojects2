@@ -1,3 +1,4 @@
+//it is a basic version and more understandable version of Linkedlist class
 public class Polynomial {
     private Node head;
     private Node tail;
@@ -7,6 +8,7 @@ public class Polynomial {
         tail = null;
     }
 
+    //adds the term to the polynomial
     public void addTerm(Term term) {
         if (head == null) {
             head = new Node(term);

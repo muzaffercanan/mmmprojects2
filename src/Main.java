@@ -3,29 +3,29 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
-public class PolynomialArithmetic {
+public class Main {
 
     public static void main(String[] args) {
         try {
-            Scanner scanner = new Scanner(new File("C:/Users/muzca/Desktop/muzo-genel/COURSES/CS/cs201/cs-201-15-tatil/first-lab/src/input.txt"));
-            PrintWriter writer = new PrintWriter(new File("C:/Users/muzca/Desktop/muzo-genel/COURSES/CS/cs201/cs-201-15-tatil/first-lab/src/output.txt"));
+            Scanner scanner = new Scanner(new File("input.txt")); //reads the input.txt file
+            PrintWriter writer = new PrintWriter("output.txt");  //writes the result to output.txt file
             int numCases = scanner.nextInt();
             scanner.nextLine();
             for (int i = 0; i < numCases; i++) {
 
                 String line = scanner.nextLine().trim(); // Reads and trims the line
 
-                String[] parts = line.split("\\s+"); //boşluklara göre ayırır
+                String[] parts = line.split("\\s+"); //divides according to the spaces
 
-                char operator = parts[0].charAt(0);
-                String polynomial1Str = parts[1];
-                String polynomial2Str = parts[2];
+                char operator = parts[0].charAt(0); //first line
+                String polynomial1Str = parts[1];   //second line
+                String polynomial2Str = parts[2];   //third line
 
 
-                Polynomial polynomial1 = parsePolynomial(polynomial1Str);
-                Polynomial polynomial2 = parsePolynomial(polynomial2Str);
+                Polynomial polynomial1 = parsePolynomial(polynomial1Str);  //parses the first polynomial
+                Polynomial polynomial2 = parsePolynomial(polynomial2Str);  //parses the first polynomial
 
-                Polynomial result = performOperation(operator, polynomial1, polynomial2);
+                Polynomial result = performOperation(operator, polynomial1, polynomial2); //performs the operation that given at the beginning
                 writer.println(formatPolynomial(result));
 
                 //System.out.println(polynomial1.getHead().getTerm().getCoefficient());
@@ -148,6 +148,7 @@ public class PolynomialArithmetic {
         return diffZ;
     }
 
+    //adds two polinomials
     private static Polynomial addPolynomials(Polynomial polynomial1, Polynomial polynomial2) {
         Polynomial result = new Polynomial();
 
@@ -200,6 +201,7 @@ public class PolynomialArithmetic {
     //it consolidates like terms ,
     private static void consolidateLikeTerms(Polynomial polynomial) {
         Node current = polynomial.getHead();
+        //checks whether current and current.next node exists
         while (current != null && current.getNext() != null) {
             Node nextNode = current.getNext();
             if (areLikeTerms(current.getTerm(), nextNode.getTerm())) {
@@ -221,23 +223,32 @@ public class PolynomialArithmetic {
     }
 
     private static Polynomial subtractPolynomials(Polynomial polynomial1, Polynomial polynomial2) {
+        // Initialize the result polynomial
         Polynomial result = new Polynomial();
 
+        // Initialize iterators for polynomial1 and polynomial2
         Node current1 = polynomial1.getHead();
         Node current2 = polynomial2.getHead();
 
+        // Iterate through polynomial terms until both iterators reach the end
         while (current1 != null || current2 != null) {
+            // Check if iterator for polynomial1 has reached the end
             if (current1 == null) {
+                // If polynomial1 has ended, add negated terms of polynomial2 to the result
                 while (current2 != null) {
+                    // Add negated term from polynomial2 to result
                     result.addTerm(new Term(-current2.getTerm().getCoefficient(),
                             current2.getTerm().getExponentX(),
                             current2.getTerm().getExponentY(),
                             current2.getTerm().getExponentZ()));
                     current2 = current2.getNext();
                 }
+                // Break the loop as polynomial2 terms are exhausted
                 break;
             }
+            // Check if iterator for polynomial2 has reached the end
             if (current2 == null) {
+                // If polynomial2 has ended, add terms of polynomial1 to the result
                 while (current1 != null) {
                     result.addTerm(new Term(current1.getTerm().getCoefficient(),
                             current1.getTerm().getExponentX(),
@@ -248,12 +259,15 @@ public class PolynomialArithmetic {
                 break;
             }
 
+            // Both iterators are valid, compare the exponents of the current terms
             Term term1 = current1.getTerm();
             Term term2 = current2.getTerm();
             int comparison = compareExponents(term1, term2);
 
             if (comparison == 0) {
+                // If exponents are equal, subtract coefficients and add result to polynomial
                 int coefficient = term1.getCoefficient() - term2.getCoefficient();
+                // Add the resulting term to the result polynomial if the coefficient is non-zero
                 if (coefficient != 0) {
                     result.addTerm(new Term(coefficient,
                             term1.getExponentX(), term1.getExponentY(), term1.getExponentZ()));
@@ -261,10 +275,12 @@ public class PolynomialArithmetic {
                 current1 = current1.getNext();
                 current2 = current2.getNext();
             } else if (comparison < 0) {
+                // If exponent of term in polynomial1 is less, add it directly to the result
                 result.addTerm(new Term(term1.getCoefficient(),
                         term1.getExponentX(), term1.getExponentY(), term1.getExponentZ()));
                 current1 = current1.getNext();
             } else {
+                // If exponent of term in polynomial2 is less, add its negation to the result
                 result.addTerm(new Term(-term2.getCoefficient(),
                         term2.getExponentX(), term2.getExponentY(), term2.getExponentZ()));
                 current2 = current2.getNext();

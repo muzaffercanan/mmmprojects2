@@ -1,5 +1,5 @@
 public class Node {
-    private Term term;
+    private Term term; //adds the term to the node
     private Node next;
 
     public Node(Term term) {
