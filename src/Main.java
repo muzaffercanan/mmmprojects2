@@ -291,28 +291,38 @@ public class Main {
     }
 
     private static Polynomial multiplyPolynomials(Polynomial polynomial1, Polynomial polynomial2) {
-        Polynomial result = new Polynomial();
+    Polynomial result = new Polynomial(); // Initialize the result polynomial
 
-        Node current1 = polynomial1.getHead();
+    Node current1 = polynomial1.getHead(); // Start iterating through polynomial1
 
-        while (current1 != null) {
-            Node current2 = polynomial2.getHead();
-            while (current2 != null) {
-                int coefficient = current1.getTerm().getCoefficient() * current2.getTerm().getCoefficient();
-                int exponentX = current1.getTerm().getExponentX() + current2.getTerm().getExponentX();
-                int exponentY = current1.getTerm().getExponentY() + current2.getTerm().getExponentY();
-                int exponentZ = current1.getTerm().getExponentZ() + current2.getTerm().getExponentZ();
+    // Iterate through each term of polynomial1
+    while (current1 != null) {
+        Node current2 = polynomial2.getHead(); // Start iterating through polynomial2 for each term of polynomial1
 
-                Term term = new Term(coefficient, exponentX, exponentY, exponentZ);
-                result.addTerm(term);
+        // Multiply each term of polynomial1 with each term of polynomial2
+        while (current2 != null) {
+            // Calculate the coefficient, exponentX, exponentY, and exponentZ for the product term
+            int coefficient = current1.getTerm().getCoefficient() * current2.getTerm().getCoefficient();
+            int exponentX = current1.getTerm().getExponentX() + current2.getTerm().getExponentX();
+            int exponentY = current1.getTerm().getExponentY() + current2.getTerm().getExponentY();
+            int exponentZ = current1.getTerm().getExponentZ() + current2.getTerm().getExponentZ();
 
-                current2 = current2.getNext();
-            }
-            current1 = current1.getNext();
+            // Create the product term
+            Term term = new Term(coefficient, exponentX, exponentY, exponentZ);
+
+            // Add the product term to the result polynomial
+            result.addTerm(term);
+
+            // Move to the next term in polynomial2
+            current2 = current2.getNext();
         }
 
-        return result;
+        // Move to the next term in polynomial1
+        current1 = current1.getNext();
     }
+
+    return result; // Return the result polynomial
+}
 
     private static String formatPolynomial(Polynomial polynomial) {
         if (polynomial.isEmpty()) {
