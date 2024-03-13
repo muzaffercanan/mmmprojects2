@@ -1,8 +1,11 @@
-3
+7
 * 5x3y2+3x2y4+2x 5x2y4+2x
 + 2xyz+4y 2xyz-4y
 - x3+3x2y+3xy2+y3 x4+4x3y+6x2y2+4xy3+y4
-
++ 5x3y2+3x2y4 5x2y4+2x
+- 2xyz+4y 2xyz+4y
+* x+y+z x+y+z
++ x4y2-3x2y3+2x100y3 -x4y2+3x2y3-2x100y3
 
 
 
